@@ -15,15 +15,16 @@ public class TeamManager {
         teams = new ArrayList<>();
     }
     //adding team from console manually
-    public void addTeam(Team t) {
+    public Team addTeam(Team t) {
         teams.add(t);
+        return t;
     }
 
     //addTeamsFromFile
     //loads teams from a file
     // takes the file's address as input
     //void method doesn't return anything but displays a message to the user confirming the teams have been loaded
-    public void addTeamsFromFile(String filename) {
+    public List<Team> addTeamsFromFile(String filename) {
         int count = 0; // count of teams added
 
         // Automatically append .txt if it’s not already there
@@ -96,12 +97,13 @@ public class TeamManager {
         } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
         }
+        return teams;
     }
     //removeTeam
     //removes Teams from list
     //takes the index value to be looked at in the list to delete the team
     //void function doesn't return anything but displays a message to let the user know if the team was deleted
-    public void removeTeam(int index){
+    public Team removeTeam(int index){
         if (index < 0 || index >= teams.size()) {
             System.out.println("Team number out of range");
         }
@@ -109,13 +111,14 @@ public class TeamManager {
             System.out.println(teams.get(index) +  " successfully removed from list.");
             teams.remove(index);
         }
+        return teams.get(index);
     }
 
     //displayTeam
     //displays the list of teams
     //takes no arguments
     //void methods doesn't return anything, prints the list if is not empty
-    public void displayTeams(){
+    public List<Team> displayTeams(){
         if (teams.isEmpty()) {
             System.out.println("No teams found.");
         } else {
@@ -123,6 +126,7 @@ public class TeamManager {
                 System.out.println("("+i+")" + teams.get(i));
             }
         }
+        return teams;
     }
 
     //getTeam
