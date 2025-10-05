@@ -23,36 +23,75 @@ public class TeamManager {
     //loads teams from a file
     // takes the file's address as input
     //void method doesn't return anything but displays a message to the user confirming the teams have been loaded
-    public void addTeamsFromFile(String filename){
-        int count =0; //count of teams added
+    public void addTeamsFromFile(String filename) {
+        int count = 0; // count of teams added
+
         // Automatically append .txt if it’s not already there
         if (!filename.endsWith(".txt")) {
             filename += ".txt";
         }
+
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
-            while ((line = br.readLine()) != null) { //reading until last line in the file
-                String[] parts = line.split("-"); //separating fields by "-"
-                if (parts.length == 7) { //if each line has 7 parts separated by "-" each part is assigned to a variable
-                    String name = parts[0];
-                    int wins = Integer.parseInt(parts[1]);
-                    int draws = Integer.parseInt(parts[2]);
-                    int losses = Integer.parseInt(parts[3]);
-                    int goalsFor = Integer.parseInt(parts[4]);
-                    int goalsAgainst = Integer.parseInt(parts[5]);
-                    List<Character> last5 = new ArrayList<>();
-                    for (char c : parts[6].toCharArray()) {
-                        last5.add(c);
-                    }
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("-");
 
-
-                    Team t = new Team(name,wins,draws,losses,goalsFor,goalsAgainst,last5); //creating the Team object with the input from the file
-                    teams.add(t);
-                    count ++; //increasing count by one to let the user know how many teams where added from the file
-                } else {
-                    System.out.println("Invalid line format: " + line);
+                if (parts.length != 7) {
+                    System.out.println("Invalid line format (wrong number of fields): " + line);
+                    continue;
                 }
+
+                String name = parts[0].trim();
+                if (name.isEmpty()) {
+                    System.out.println("Invalid team name in line: " + line);
+                    continue;
+                }
+
+                int wins, draws, losses, goalsFor, goalsAgainst;
+
+                try {
+                    wins = Integer.parseInt(parts[1]);
+                    draws = Integer.parseInt(parts[2]);
+                    losses = Integer.parseInt(parts[3]);
+                    goalsFor = Integer.parseInt(parts[4]);
+                    goalsAgainst = Integer.parseInt(parts[5]);
+                    // Ensure integers are non-negative
+                    if (wins < 0 || draws < 0 || losses < 0 || goalsFor < 0 || goalsAgainst < 0) {
+                        System.out.println("Negative numbers are not allowed: " + line);
+                        continue;
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid number format in line: " + line);
+                    continue;
+                }
+
+                String last5String = parts[6].trim().toUpperCase();
+                if (last5String.length() != 5) {
+                    System.out.println("Last5 must be exactly 5 characters (W/D/L): " + line);
+                    continue;
+                }
+
+                List<Character> last5 = new ArrayList<>();
+                boolean validLast5 = true;
+                for (char c : last5String.toCharArray()) {
+                    if (c != 'W' && c != 'D' && c != 'L') {
+                        validLast5 = false;
+                        break;
+                    }
+                    last5.add(c);
+                }
+
+                if (!validLast5) {
+                    System.out.println("Invalid last5 characters in line: " + line);
+                    continue;
+                }
+
+                // Create team and add to list
+                Team t = new Team(name, wins, draws, losses, goalsFor, goalsAgainst, last5);
+                teams.add(t);
+                count++;
             }
+
             System.out.println(count + " team(s) successfully loaded from file.");
         } catch (IOException e) {
             System.out.println("Error reading file: " + e.getMessage());
@@ -63,7 +102,7 @@ public class TeamManager {
     //takes the index value to be looked at in the list to delete the team
     //void function doesn't return anything but displays a message to let the user know if the team was deleted
     public void removeTeam(int index){
-        if (index >= teams.size()) {
+        if (index < 0 || index >= teams.size()) {
             System.out.println("Team number out of range");
         }
         else {

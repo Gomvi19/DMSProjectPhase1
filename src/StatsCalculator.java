@@ -14,10 +14,15 @@ public class StatsCalculator {
         return (team.getWins() * 100.0) / totalGames;
     }
 
+    public int points(Team team) {
+        return (team.getWins() * 3) + team.getDraws();
+    }
+
     // Custom action: Display a formatted summary of the team’s stats
     public String displayTeamStats(Team team) {
         return "Team: " + team.getName() +
                 "\nGoal Difference: " + calculateGoalDifference(team) +
-                "\nWin Rate: " + String.format("%.2f", calculateWinRate(team)) + "%";
+                "\nWin Rate: " + String.format("%.2f", calculateWinRate(team)) + "%" +
+                "\nTotal points: " + points(team);
     }
 }
