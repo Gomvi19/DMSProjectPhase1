@@ -26,8 +26,9 @@ public class TeamApp {
                 "2. Import Teams from File\n" +
                 "3. Remove Team\n" +
                 "4. Display Teams\n" +
-                "5. Calculate Stats\n" +
-                "6. Quit\n";
+                "5. Update Team\n" +
+                "6. Calculate Stats\n" +
+                "7. Quit\n";
     }
 
     //getPositiveInt
@@ -103,14 +104,21 @@ public class TeamApp {
 
                 case 3: // Remove Teams
                     int index = getPositiveInt("Enter index of team to remove: ");
-                    teamManager.removeTeam(index);
+                    if(teamManager.removeTeam(index)!= null){
+                        System.out.println("Team removed successfully.");
+                    }
+                    else
+                        System.out.println("Team could not be found at that index.");
                     break;
 
                 case 4: // Display Teams
                     teamManager.displayTeams();
                     break;
-
-                case 5: //custom method
+                case 5://update team
+                    int selection = getPositiveInt("Enter index of team to update: ");
+                    teamManager.updateTeam(selection);
+                    break;
+                case 6: //custom method
                     teamManager.displayTeams();
                     int index2 = getPositiveInt("Enter index of team to display stats for: ");
                     StatsCalculator stats = new StatsCalculator();
@@ -120,7 +128,7 @@ public class TeamApp {
                         System.out.println("No team with that index exists.");
                     break;
 
-                case 6: // Quit
+                case 7: // Quit
                     System.out.println("Goodbye!");
                     return false; // end loop
 
