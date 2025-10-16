@@ -161,4 +161,12 @@ public class TeamManager {
         return null;
     }
 
+    //size
+    // retrieves the size of the list
+    //no arguments are passed
+    //returns and integer representing the size of the list
+    public int size(){
+        return teams.size();
+    }
+
 }

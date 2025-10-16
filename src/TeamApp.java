@@ -116,7 +116,7 @@ public class TeamApp {
                     break;
                 case 5://update team
                     int selection = getPositiveInt("Enter index of team to update: ");
-                    while (selection > teamManager.displayTeams().size()){
+                    while (selection > teamManager.size()){
                         System.out.println("Please enter a valid index.");
                         selection = getPositiveInt("Enter index of team to update: ");
                     }
