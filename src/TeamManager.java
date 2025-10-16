@@ -117,73 +117,21 @@ public class TeamManager {
     //updates a team's attributes
     //takes the index of the team as argument
     //returns updated team
-    public void updateTeam(int index) {
-        Scanner input = new Scanner(System.in);
-        if (index < 0 || index >= teams.size()) {
-            System.out.println("Invalid team index.");
-            return;
-        }
+    public Team updateTeam(int index, String name, int wins, int draws, int losses, int goalsFor, int goalsAgainst, List<Character> last5) {
+        if (index < 0 || index >= teams.size())
+            return null;
 
         Team team = teams.get(index);
-        System.out.println("Updating team: " + team.getName());
 
-        System.out.print("Enter new name (leave blank to keep '" + team.getName() + "'): ");
-        String name = input.nextLine();
-        if (!name.isEmpty()) {
-            team.setName(name);
-        }
-
-        team.setWins(readPositiveInt("Enter new wins (current: " + team.getWins() + "): ", team.getWins()));
-        team.setDraws(readPositiveInt("Enter new draws (current: " + team.getDraws() + "): ", team.getDraws()));
-        team.setLosses(readPositiveInt("Enter new losses (current: " + team.getLosses() + "): ", team.getLosses()));
-        team.setGoalsFor(readPositiveInt("Enter new goals for (current: " + team.getGoalsFor() + "): ", team.getGoalsFor()));
-        team.setGoalsAgainst(readPositiveInt("Enter new goals against (current: " + team.getGoalsAgainst() + "): ", team.getGoalsAgainst()));
-
-        // Update last5 results
-        List<Character> last5 = new ArrayList<>();
-        System.out.println("Update last 5 results (W/D/L). Leave blank to keep current sequence: " + team.getLast5());
-        for (int i = 0; i < 5; i++) {
-            System.out.print("Result [" + (i + 1) + "]: ");
-            String inputStr = input.nextLine();
-
-            if (inputStr.isEmpty()) {
-                last5.add(team.getLast5().get(i)); // keep old value
-            } else {
-                char result = Character.toUpperCase(inputStr.charAt(0));
-                while (result != 'W' && result != 'D' && result != 'L') {
-                    System.out.print("Invalid input. Enter W/D/L: ");
-                    inputStr = input.nextLine().trim();
-                    result = Character.toUpperCase(inputStr.charAt(0));
-                }
-                last5.add(result);
-            }
-        }
+        team.setName(name);
+        team.setWins(wins);
+        team.setDraws(draws);
+        team.setLosses(losses);
+        team.setGoalsFor(goalsFor);
+        team.setGoalsAgainst(goalsAgainst);
         team.setLast5(last5);
 
-        System.out.println("Team updated successfully!");
-    }
-
-    // Helper to read positive ints with fallback
-    private int readPositiveInt(String prompt, int currentValue) {
-        Scanner input = new Scanner(System.in);
-        System.out.print(prompt);
-        String line = input.nextLine();
-
-        if (line.isEmpty()) {
-            return currentValue; // keep old if blank
-        }
-
-        try {
-            int value = Integer.parseInt(line);
-            if (value >= 0) {
-                return value;
-            }
-        } catch (NumberFormatException e) {
-            // do nothing, fall through
-        }
-
-        System.out.println("Invalid input, keeping current value: " + currentValue);
-        return currentValue;
+        return team;
     }
 
 

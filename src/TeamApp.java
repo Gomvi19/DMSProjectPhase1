@@ -116,7 +116,37 @@ public class TeamApp {
                     break;
                 case 5://update team
                     int selection = getPositiveInt("Enter index of team to update: ");
-                    teamManager.updateTeam(selection);
+                    while (selection > teamManager.displayTeams().size()){
+                        System.out.println("Please enter a valid index.");
+                        selection = getPositiveInt("Enter index of team to update: ");
+                    }
+                    System.out.print("Enter name: ");
+                    String new_name = input.nextLine();
+                    while (new_name.isEmpty()) {
+                        System.out.println("Invalid input must enter a name, please try again");
+                        new_name = input.nextLine();
+                    }
+                    int new_wins = getPositiveInt("Enter wins: ");
+                    int new_draws = getPositiveInt("Enter draws: ");
+                    int new_losses = getPositiveInt("Enter losses: ");
+                    int new_goalsFor = getPositiveInt("Enter goals for: ");
+                    int new_goalsAgainst = getPositiveInt("Enter goals against: ");
+
+                    System.out.print("Enter last5: ");
+                    List<Character> new_last5 = new ArrayList<Character>();
+                    for (int i = 0; i < 5; i++) {
+                        System.out.println("Enter last5 (W or D or L): [" + (i + 1) + "]: ");
+                        char new_result = input.next().charAt(0);
+                        new_result = Character.toUpperCase(new_result);
+                        while ((new_result != 'W') && (new_result != 'D') && (new_result != 'L')) {
+                            System.out.println("Incorrect input please enter W/D/L");
+                            new_result = input.next().charAt(0);
+                            new_result = Character.toUpperCase(new_result);
+                        }
+                        new_last5.add(new_result);
+                    }
+
+                    teamManager.updateTeam(selection,new_name,new_wins,new_draws,new_losses,new_goalsFor,new_goalsAgainst,new_last5);
                     break;
                 case 6: //custom method
                     teamManager.displayTeams();
