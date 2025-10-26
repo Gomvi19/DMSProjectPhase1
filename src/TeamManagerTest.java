@@ -32,8 +32,8 @@ class TeamManagerTest {
         assertEquals("Real Madrid",team.getName(),"Team was not created");
         assertEquals(1,teamManager.displayTeams().size(),"Team was not added to the list");
 
-        /*assertEquals("Barcelona", team.getName(), "Team was not created");
-        assertEquals(2,teamManager.displayTeams().size(),"Team was not added to the list");*/
+        assertEquals("Barcelona", team.getName(), "Team was not created");
+        assertEquals(2,teamManager.displayTeams().size(),"Team was not added to the list");
     }
 
     @org.junit.jupiter.api.Test
@@ -51,10 +51,10 @@ class TeamManagerTest {
         }, "File should open and be read without throwing an exception");
 
 
-        /*String filepath = "sometext";
+        String filepath = "sometext";
         assertThrows(IOException.class, () -> {
             teamManager.addTeamsFromFile(filepath);
-        }, "Expected IOException when file does not exist");*/
+        }, "Expected IOException when file does not exist");
     }
 
     @org.junit.jupiter.api.Test
@@ -64,8 +64,8 @@ class TeamManagerTest {
         teamManager.removeTeam(0);
         assertTrue(teamManager.displayTeams().isEmpty(), "Team list should be empty after removal.");
 
-        /*teamManager.removeTeam(5);
-        assertFalse(teamManager.displayTeams().isEmpty(), "Removing with invalid index should do nothing");*/
+        teamManager.removeTeam(5);
+        assertFalse(teamManager.displayTeams().isEmpty(), "Removing with invalid index should do nothing");
 
     }
 
@@ -82,7 +82,7 @@ class TeamManagerTest {
         assertNotEquals(54, teamManager.getTeam(0).getGoalsFor(), "Team goals for should update correctly.");
         assertNotEquals(12, teamManager.getTeam(0).getGoalsAgainst(), "Team goals against should update correctly.");
         assertNotEquals(Arrays.asList('W', 'W', 'W', 'D', 'L'), teamManager.getTeam(0).getLast5(), "Team last 5 should update correctly.");
-        //assertEquals("Real Madrid", teamManager.getTeam(0).getName(), "Name should not be Real Madrid.");
+        assertEquals("Real Madrid", teamManager.getTeam(0).getName(), "Name should not be Real Madrid.");
     }
 
     @org.junit.jupiter.api.Test
@@ -99,6 +99,6 @@ class TeamManagerTest {
         assertEquals(expectedGoalDiff, goal_diff, "Team goal difference should calculate correctly.");
         assertEquals(expectedWinRate,win_rate,"win rate should calculate correctly");
         assertEquals(expectedPoints,points,"points should calculate correctly.");
-        //assertEquals(21.7,win_rate,"win rate should calculate correctly");
+        assertEquals(21.7,win_rate,"win rate should calculate correctly");
     }
 }
