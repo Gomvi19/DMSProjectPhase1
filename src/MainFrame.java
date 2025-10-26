@@ -292,7 +292,7 @@ public class MainFrame extends JFrame {
                 int selectedRow = DisplayTable.getSelectedRow();
 
                 if (selectedRow == -1) { //no team selected
-                    JOptionPane.showMessageDialog(null, "Please select a team to update.");
+                    JOptionPane.showMessageDialog(null, "Please select a team to get stats for.");
                     return;
                 }
                 Team selectedTeam = teamManager.getTeam(selectedRow);

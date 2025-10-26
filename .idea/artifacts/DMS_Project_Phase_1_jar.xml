@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="DMS Project Phase 1:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/DMS_Project_Phase_1_jar</output-path>
-    <root id="archive" name="DMS Project Phase 1.jar">
-      <element id="module-output" name="DMS Project Phase 1" />
-    </root>
-  </artifact>
-</component>
