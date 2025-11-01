@@ -26,7 +26,6 @@ public class MainFrame extends JFrame {
     private JPanel mainPanel;
     private JTable DisplayTable;
     private JScrollPane DisplayTbale;
-    private JButton btmLoad;
     private JButton btmRemove;
     private JButton btmUpdate;
     private JButton btmStats;
@@ -38,6 +37,10 @@ public class MainFrame extends JFrame {
     private int editingRowIndex = -1;
     private StatsCalculator stats = new StatsCalculator();
     private String databasePath = null;
+    private Team_Table teamTable;
+    ArrayList<ArrayList<Object>> data = new ArrayList<ArrayList<Object>>();
+    private int selectedID;
+
     //Constructor
     //Initializes the GUI components, sets up button listeners, and configures table columns
     public  MainFrame()
@@ -50,7 +53,7 @@ public class MainFrame extends JFrame {
 
         // Define table columns
         String[] columnNames = {
-                "Name", "Wins", "Draws", "Losses", "Goals For", "Goals Against", "Last 5"
+                "ID","Name", "Wins", "Draws", "Losses", "Goals For", "Goals Against", "Last 5"
         };
 
         // Initialize table model with no rows but visible columns
@@ -58,14 +61,24 @@ public class MainFrame extends JFrame {
 
         // Wrap JTable inside a scroll pane (so headers show correctly)
         DisplayTable.setModel(tableModel);
-
+        DisplayTable.removeColumn(DisplayTable.getColumn("ID"));
         // Make frame visible at the end
         setVisible(true);
+
         //------Add Team Button-------
         //manually add a team or updates an existing team
         btmAdd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (teamTable == null) {
+                    JOptionPane.showMessageDialog(
+                            MainFrame.this,
+                            "Please select a database before performing this action.",
+                            "Database Not Connected",
+                            JOptionPane.WARNING_MESSAGE
+                    );
+                    return;
+                }
                 //get data from text fields and validate data
                 String name = tfTeamName.getText();
                     if (name.isEmpty()) {
@@ -94,34 +107,29 @@ public class MainFrame extends JFrame {
                         }
                         last5.add(c);
                     }
+                    last5Str = "";
+                    for (char c : last5)
+                        last5Str += c;
                     //if editingRowIndex equals -1 then we're not in update mode so we just add the new team into the list and table
                     if(editingRowIndex == -1) {
-                        Team team = new Team(name, wins, draws, losses, goalsFor, goalsAgainst, last5);
-                        teamManager.addTeam(team);
+                        teamTable.insert(name,wins,draws,losses,goalsFor,goalsAgainst,last5Str);
                         JOptionPane.showMessageDialog(null, "Team added successfully!");
-
-                        // Add row to JTable and add last 5 characters into a string for better display
-                        String last5String = "";
-                        for (char c : last5)
-                            last5String += c;
-                        tableModel.addRow(new Object[]{
-                                name, wins, draws, losses, goalsFor, goalsAgainst, last5String
-                        });
+                        refreshTable();
                     }
                     //if editingRowIndex is not -1 then we are in update mode and use the value of that variable as the index to update the object in the list
                     else{
-                        teamManager.updateTeam(editingRowIndex, name, wins, draws, losses, goalsFor, goalsAgainst, last5);
 
                         // Update table row
-                        tableModel.setValueAt(name, editingRowIndex, 0);
-                        tableModel.setValueAt(wins, editingRowIndex, 1);
-                        tableModel.setValueAt(draws, editingRowIndex, 2);
-                        tableModel.setValueAt(losses, editingRowIndex, 3);
-                        tableModel.setValueAt(goalsFor, editingRowIndex, 4);
-                        tableModel.setValueAt(goalsAgainst, editingRowIndex, 5);
-                        tableModel.setValueAt(last5Str, editingRowIndex, 6);
+                        teamTable.update("Team_Name", name, "ID", String.valueOf(selectedID));
+                        teamTable.update("Wins", String.valueOf(wins), "ID", String.valueOf(selectedID));
+                        teamTable.update("Draws", String.valueOf(draws), "ID", String.valueOf(selectedID));
+                        teamTable.update("Losses", String.valueOf(losses), "ID", String.valueOf(selectedID));
+                        teamTable.update("GoalsFor", String.valueOf(goalsFor), "ID", String.valueOf(selectedID));
+                        teamTable.update("GoalsAgainst", String.valueOf(goalsAgainst), "ID", String.valueOf(selectedID));
+                        teamTable.update("Last_5_Results", last5Str, "ID", String.valueOf(selectedID));
                         //after update show confirmation message and set Add button back to normal and editingRowIndex back to -1
                         JOptionPane.showMessageDialog(null, "Team updated successfully!");
+                        refreshTable();
                         btmAdd.setText("Add Team"); // switch back to add mode
                         editingRowIndex = -1;
                     }
@@ -137,93 +145,21 @@ public class MainFrame extends JFrame {
             }
         });
 
-        // --- Load from file button ---
-        //Loads team data from a text file and validates each line before adding to the list and table
-        btmLoad.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                int result = fileChooser.showOpenDialog(MainFrame.this);
 
-                if (result != JFileChooser.APPROVE_OPTION) {
-                    JOptionPane.showMessageDialog(null, "File loading canceled.");
-                    return;
-                }
-                //address of the file
-                String filename = fileChooser.getSelectedFile().getAbsolutePath();
-
-                try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-                    String line;
-                    int count = 0;
-                    int invalidCount = 0;
-                    //read unit there are no more lines left
-                    while ((line = br.readLine()) != null) {
-                        String[] parts = line.split("-");
-
-                        if (parts.length != 7) {
-                            invalidCount++;
-                            continue;
-                        }
-
-                        String name = parts[0];
-                        if (name.isEmpty()) {
-                            invalidCount++;
-                            continue;
-                        }
-
-                        int wins, draws, losses, goalsFor, goalsAgainst;
-                        try {
-                            wins = Integer.parseInt(parts[1]);
-                            draws = Integer.parseInt(parts[2]);
-                            losses = Integer.parseInt(parts[3]);
-                            goalsFor = Integer.parseInt(parts[4]);
-                            goalsAgainst = Integer.parseInt(parts[5]);
-                            if (wins < 0 || draws < 0 || losses < 0 || goalsFor < 0 || goalsAgainst < 0) {
-                                invalidCount++;
-                                continue;
-                            }
-                        } catch (NumberFormatException ex) {
-                            invalidCount++;
-                            continue;
-                        }
-
-                        String last5String = parts[6].trim().toUpperCase();
-                        if (last5String.length() != 5 || !last5String.matches("[WDL]+")) {
-                            invalidCount++;
-                            continue;
-                        }
-
-                        List<Character> last5 = new ArrayList<>();
-                        for (char c : last5String.toCharArray())
-                            last5.add(c);
-
-                        Team team = new Team(name, wins, draws, losses, goalsFor, goalsAgainst, last5);
-                        teamManager.addTeam(team);
-
-                        // Add valid team to table
-                        tableModel.addRow(new Object[]{
-                                name, wins, draws, losses, goalsFor, goalsAgainst, last5String
-                        });
-                        count++;
-                    }
-
-                    // Show summary results
-                    String message = count + " team(s) successfully loaded.";
-                    if (invalidCount > 0) {
-                        message += "\n" + invalidCount + " line(s) were skipped due to invalid format or data.";
-                    }
-                    JOptionPane.showMessageDialog(null, message);
-
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(null, "Error reading file: " + ex.getMessage());
-                }
-            }
-        });
         // --- Remove team button ---
         //Removes the selected team from the JTable and from the TeamManager list
         btmRemove.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (teamTable == null) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Please connect to a database before deleting a record.",
+                            "Database Not Connected",
+                            JOptionPane.WARNING_MESSAGE
+                    );
+                    return;
+                }
                 int selectedRow = DisplayTable.getSelectedRow(); // Get the selected row in JTable
 
                 if (selectedRow == -1) { // Nothing selected
@@ -240,21 +176,29 @@ public class MainFrame extends JFrame {
                 );
 
                 if (confirm == JOptionPane.YES_OPTION) {
-                    // Remove from TeamManager
-                    teamManager.removeTeam(selectedRow);
-
-                    // Remove from JTable
-                    tableModel.removeRow(selectedRow);
+                    int id = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
+                    teamTable.delete("ID", String.valueOf(id));
+                    refreshTable();
 
                     JOptionPane.showMessageDialog(null, "Team removed successfully!");
                 }
             }
         });
+
         // --- Update team button ---
         //Loads the selected team's details into the text fields for editing
         btmUpdate.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (teamTable == null) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Please connect to a database before deleting a record.",
+                            "Database Not Connected",
+                            JOptionPane.WARNING_MESSAGE
+                    );
+                    return;
+                }
                 int selectedRow = DisplayTable.getSelectedRow();
 
                 if (selectedRow == -1) { //no team selected
@@ -262,24 +206,21 @@ public class MainFrame extends JFrame {
                     return;
                 }
 
-                // Get the selected team from TeamManager
-                Team selectedTeam = teamManager.getTeam(selectedRow);
+                int modelRow = DisplayTable.convertRowIndexToModel(selectedRow);
 
                 // Populate text fields with current values
-                tfTeamName.setText(selectedTeam.getName());
-                tfWins.setText(String.valueOf(selectedTeam.getWins()));
-                tfDraws.setText(String.valueOf(selectedTeam.getDraws()));
-                tfLosses.setText(String.valueOf(selectedTeam.getLosses()));
-                tfGoalsFor.setText(String.valueOf(selectedTeam.getGoalsFor()));
-                tfGoalsAgainst.setText(String.valueOf(selectedTeam.getGoalsAgainst()));
+                tfTeamName.setText(tableModel.getValueAt(modelRow, 1).toString());
+                tfWins.setText(tableModel.getValueAt(modelRow, 2).toString());
+                tfDraws.setText(tableModel.getValueAt(modelRow, 3).toString());
+                tfLosses.setText(tableModel.getValueAt(modelRow, 4).toString());
+                tfGoalsFor.setText(tableModel.getValueAt(modelRow, 5).toString());
+                tfGoalsAgainst.setText(tableModel.getValueAt(modelRow, 6).toString());
+                tfLast5.setText(tableModel.getValueAt(modelRow, 7).toString());
 
-                StringBuilder last5String = new StringBuilder();
-                for (char c : selectedTeam.getLast5())
-                    last5String.append(c);
-                tfLast5.setText(last5String.toString());
 
                 // Switch to update mode
                 editingRowIndex = selectedRow;
+                selectedID = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
                 btmAdd.setText("Save Update");
 
                 JOptionPane.showMessageDialog(null, "You can now edit the team fields and click 'Save Update' to confirm.");
@@ -292,15 +233,26 @@ public class MainFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = DisplayTable.getSelectedRow();
-
+                int points,goalDifference,totalGames;
+                double winRate;
                 if (selectedRow == -1) { //no team selected
                     JOptionPane.showMessageDialog(null, "Please select a team to get stats for.");
                     return;
                 }
-                Team selectedTeam = teamManager.getTeam(selectedRow);
+                int modelRow = DisplayTable.convertRowIndexToModel(selectedRow);
+                int wins = Integer.parseInt(tableModel.getValueAt(modelRow, 2).toString());
+                int draws = Integer.parseInt(tableModel.getValueAt(modelRow, 3).toString());
+                int losses = Integer.parseInt(tableModel.getValueAt(modelRow, 4).toString());
+                int goalsFor = Integer.parseInt(tableModel.getValueAt(modelRow, 5).toString());
+                int goalsAgainst = Integer.parseInt(tableModel.getValueAt(modelRow, 6).toString());
 
-                JOptionPane.showMessageDialog(null, stats.displayTeamStats(selectedTeam),"Team Stats", JOptionPane.INFORMATION_MESSAGE);
+                points = (wins * 3) + draws;
+                goalDifference = goalsFor - goalsAgainst;
+                totalGames = wins + draws + losses;
 
+                winRate = (totalGames == 0) ? 0.0 : ((double) wins * 100 / totalGames);
+                String message = "Team: " + tableModel.getValueAt(modelRow, 1).toString() + "\nWin Rate: " + String.format("%.2f", winRate) + "\nPoints: " + points + "\nGoal Difference: " + goalDifference;
+                JOptionPane.showMessageDialog(null, message,"Team Stats", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
@@ -324,7 +276,8 @@ public class MainFrame extends JFrame {
                     );
 
                     // Initialize DBHelper with the selected path
-                    Team_Table teamTable = new Team_Table(databasePath);
+                    teamTable = new Team_Table(databasePath);
+                    refreshTable();
                 } else {
                     JOptionPane.showMessageDialog(
                             MainFrame.this,
@@ -357,8 +310,26 @@ public class MainFrame extends JFrame {
         }
     }
 
+    public void refreshTable() {
+        data = teamTable.getExecuteResult("select * from Team_Table");
+        if (data.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    MainFrame.this,
+                    "No records found in the selected database.",
+                    "Database Empty",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        } else {
+            // Clear the table before adding new rows (optional)
+            tableModel.setRowCount(0);
 
+            // Loop through each row of database data
+            for (ArrayList<Object> row : data) {
+                tableModel.addRow(row.toArray());
+            }
 
+        }
+    }
 
     public static   void main(String[] args)
     {

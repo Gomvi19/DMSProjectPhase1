@@ -5,13 +5,13 @@ import java.util.ArrayList;
 
 public class Team_Table extends DBHelper {
 	private final String TABLE_NAME = "Team_Table";
-	public static final String Team_Name = "Team Name";
+	public static final String Team_Name = "Team_Name";
 	public static final String Wins = "Wins";
 	public static final String Draws = "Draws";
 	public static final String Losses = "Losses";
 	public static final String GoalsFor = "GoalsFor";
 	public static final String GoalsAgainst = "GoalsAgainst";
-	public static final String Last_5_results = "Last 5 results";
+	public static final String Last_5_results = "Last_5_results";
 
     public Team_Table(String databasePath) {
         super(databasePath);
