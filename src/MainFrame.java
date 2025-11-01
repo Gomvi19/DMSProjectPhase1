@@ -2,6 +2,7 @@
 //MainFrame class
 //Handles the graphical user interface for the Team Management System.
 //Allows the user to add, load, remove, update, and get stats of Team objects through interactive components
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,13 +30,14 @@ public class MainFrame extends JFrame {
     private JButton btmRemove;
     private JButton btmUpdate;
     private JButton btmStats;
+    private JButton btmDB;
 
     // Logic and data handling
     private TeamManager teamManager= new TeamManager();
     private DefaultTableModel tableModel;
     private int editingRowIndex = -1;
     private StatsCalculator stats = new StatsCalculator();
-
+    private String databasePath = null;
     //Constructor
     //Initializes the GUI components, sets up button listeners, and configures table columns
     public  MainFrame()
@@ -299,6 +301,38 @@ public class MainFrame extends JFrame {
 
                 JOptionPane.showMessageDialog(null, stats.displayTeamStats(selectedTeam),"Team Stats", JOptionPane.INFORMATION_MESSAGE);
 
+            }
+        });
+
+        // --- Connect to database button---
+        //connects to a database of teams to make all changes made in the GUI persist after closing the program
+        btmDB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Select SQLite Database File");
+
+                int result = fileChooser.showOpenDialog(MainFrame.this);
+
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    databasePath = fileChooser.getSelectedFile().getAbsolutePath();
+                    JOptionPane.showMessageDialog(
+                            MainFrame.this,
+                            "Database selected:\n" + databasePath,
+                            "Database Loaded",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                    // Initialize DBHelper with the selected path
+                    Team_Table teamTable = new Team_Table(databasePath);
+                } else {
+                    JOptionPane.showMessageDialog(
+                            MainFrame.this,
+                            "No database selected.",
+                            "Warning",
+                            JOptionPane.WARNING_MESSAGE
+                    );
+                }
             }
         });
     }
